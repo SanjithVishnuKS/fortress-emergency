@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101418">
+<title>FORTRESS | Emergency Portal</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #101418;
+  --panel: #1a2229;
+  --steel: #8999a6;
+  --white: #edf2f5;
+  --accent: #d5a84f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #26333d, var(--bg) 65%);
+  color: var(--white);
+  font-family: system-ui, sans-serif;
+}
+main { max-width: 900px; margin: auto; padding: 48px 22px; }
+header { border-bottom: 1px solid #39444c; padding-bottom: 24px; }
+.brand { letter-spacing: 7px; color: var(--accent); font-size: 13px; }
+h1 { font-size: clamp(38px, 8vw, 65px); margin: 12px 0 4px; }
+.subtitle { color: var(--steel); letter-spacing: 2px; font-size: 12px; }
+h2 { font-size: 16px; letter-spacing: 1px; }
+.status, .panel {
+  background: var(--panel);
+  border: 1px solid #35424c;
+  border-radius: 12px;
+  padding: 22px;
+  margin-top: 22px;
+}
+.status-label { color: var(--steel); font-size: 12px; }
+.status-value { color: var(--accent); font-size: 21px; margin-top: 8px; }
+.dot {
+  display: inline-block;
+  width: 9px; height: 9px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-right: 9px;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 14px; }
+p { color: #b6c1c9; line-height: 1.65; font-size: 14px; }
+footer { color: #73818b; font-size: 11px; margin-top: 45px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand">FORTRESS SYSTEMS</div>
+  <h1>FORTRESS</h1>
+  <div class="subtitle">ONE DOMAIN. SIX DIVISIONS.</div>
+</header>
+
+<section class="status">
+  <div class="status-label">HOME SERVER CONNECTION</div>
+  <div class="status-value"><span class="dot"></span>AWAITING HEARTBEAT</div>
+  <p>This portal is online. The home server's live status has not yet been connected.</p>
+</section>
+
+<div class="grid">
+  <section class="panel">
+    <h2>01 — SYSTEM STATUS</h2>
+    <p>Live monitoring will be connected through WATCHTOWER.</p>
+  </section>
+  <section class="panel">
+    <h2>02 — DATA RECOVERY</h2>
+    <p>Backup status and recovery instructions will appear here after backup automation is configured.</p>
+  </section>
+  <section class="panel">
+    <h2>03 — EMERGENCY ACCESS</h2>
+    <p>Essential services are currently hosted at home. They may be unavailable during a power or network outage.</p>
+  </section>
+  <section class="panel">
+    <h2>04 — SECURITY</h2>
+    <p>Private server access remains protected. Never publish passwords, keys or internal network details here.</p>
+  </section>
+</div>
+
+<footer>FORTRESS · EMERGENCY OPERATIONS PORTAL · EST. 2026</footer>
+</main>
+</body>
+</html>
