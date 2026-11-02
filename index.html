@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#101418">
 <title>FORTRESS | Emergency Portal</title>
+
 <style>
 :root {
   color-scheme: dark;
@@ -14,8 +15,11 @@
   --steel: #8999a6;
   --white: #edf2f5;
   --accent: #d5a84f;
+  --green: #54c58b;
+  --red: #ef6464;
 }
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -23,12 +27,23 @@ body {
   color: var(--white);
   font-family: system-ui, sans-serif;
 }
+
 main { max-width: 900px; margin: auto; padding: 48px 22px; }
+
 header { border-bottom: 1px solid #39444c; padding-bottom: 24px; }
-.brand { letter-spacing: 7px; color: var(--accent); font-size: 13px; }
+
+.brand {
+  letter-spacing: 7px;
+  color: var(--accent);
+  font-size: 13px;
+}
+
 h1 { font-size: clamp(38px, 8vw, 65px); margin: 12px 0 4px; }
+
 .subtitle { color: var(--steel); letter-spacing: 2px; font-size: 12px; }
+
 h2 { font-size: 16px; letter-spacing: 1px; }
+
 .status, .panel {
   background: var(--panel);
   border: 1px solid #35424c;
@@ -36,22 +51,71 @@ h2 { font-size: 16px; letter-spacing: 1px; }
   padding: 22px;
   margin-top: 22px;
 }
+
 .status-label { color: var(--steel); font-size: 12px; }
-.status-value { color: var(--accent); font-size: 21px; margin-top: 8px; }
+
+.status-value {
+  color: var(--accent);
+  font-size: 21px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
 .dot {
   display: inline-block;
-  width: 9px; height: 9px;
+  width: 9px;
+  height: 9px;
   background: var(--accent);
   border-radius: 50%;
   margin-right: 9px;
 }
-.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 14px; }
+
+.online { color: var(--green); }
+.online .dot { background: var(--green); }
+
+.offline { color: var(--red); }
+.offline .dot { background: var(--red); }
+
+.error { color: var(--accent); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 14px;
+}
+
 p { color: #b6c1c9; line-height: 1.65; font-size: 14px; }
-footer { color: #73818b; font-size: 11px; margin-top: 45px; letter-spacing: 1px; }
+
+.metric {
+  color: var(--white);
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.metric span { color: var(--steel); }
+
+footer {
+  color: #73818b;
+  font-size: 11px;
+  margin-top: 45px;
+  letter-spacing: 1px;
+}
+
+.refresh {
+  color: var(--steel);
+  font-size: 11px;
+  margin-top: 14px;
+}
+
+@media (max-width: 500px) {
+  main { padding: 30px 16px; }
+}
 </style>
 </head>
+
 <body>
 <main>
+
 <header>
   <div class="brand">FORTRESS SYSTEMS</div>
   <h1>FORTRESS</h1>
@@ -60,30 +124,167 @@ footer { color: #73818b; font-size: 11px; margin-top: 45px; letter-spacing: 1px;
 
 <section class="status">
   <div class="status-label">HOME SERVER CONNECTION</div>
-  <div class="status-value"><span class="dot"></span>AWAITING HEARTBEAT</div>
-  <p>This portal is online. The home server's live status has not yet been connected.</p>
+
+  <div class="status-value" id="mainStatus">
+    <span class="dot"></span>CONNECTING...
+  </div>
+
+  <p id="statusMessage">
+    Establishing connection with WATCHTOWER.
+  </p>
+
+  <div class="metric">
+    <span>Last heartbeat:</span>
+    <strong id="lastHeartbeat">Waiting...</strong>
+  </div>
+
+  <div class="metric">
+    <span>Last checked:</span>
+    <strong id="lastChecked">Waiting...</strong>
+  </div>
+
+  <div class="refresh" id="refreshInfo">
+    Automatic refresh every 30 seconds.
+  </div>
 </section>
 
 <div class="grid">
+
   <section class="panel">
     <h2>01 — SYSTEM STATUS</h2>
-    <p>Live monitoring will be connected through WATCHTOWER.</p>
+    <p id="systemStatus">
+      Waiting for WATCHTOWER telemetry.
+    </p>
   </section>
+
   <section class="panel">
     <h2>02 — DATA RECOVERY</h2>
-    <p>Backup status and recovery instructions will appear here after backup automation is configured.</p>
+    <p>
+      Backup status and recovery instructions will appear
+      here after backup automation is configured.
+    </p>
   </section>
+
   <section class="panel">
     <h2>03 — EMERGENCY ACCESS</h2>
-    <p>Essential services are currently hosted at home. They may be unavailable during a power or network outage.</p>
+    <p>
+      Essential services are currently hosted at home.
+      They may be unavailable during a power or network outage.
+    </p>
   </section>
+
   <section class="panel">
     <h2>04 — SECURITY</h2>
-    <p>Private server access remains protected. Never publish passwords, keys or internal network details here.</p>
+    <p>
+      Private server access remains protected.
+      Never publish passwords, keys or internal network details here.
+    </p>
   </section>
+
 </div>
 
-<footer>FORTRESS · EMERGENCY OPERATIONS PORTAL · EST. 2026</footer>
+<footer>
+  FORTRESS · EMERGENCY OPERATIONS PORTAL · EST. 2026
+</footer>
+
 </main>
+
+<script>
+const WATCHTOWER_URL =
+  "https://fortress-watchtower.always04king.workers.dev/status";
+
+const REFRESH_INTERVAL = 30000;
+
+function formatTime(value) {
+  if (!value) return "No heartbeat received";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "Unknown";
+
+  return date.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  }) + " IST";
+}
+
+function showStatus(status, message, lastSeen, checkedAt) {
+  const main = document.getElementById("mainStatus");
+  const system = document.getElementById("systemStatus");
+
+  main.className = "status-value " + status.toLowerCase();
+
+  main.innerHTML =
+    '<span class="dot"></span>' + status;
+
+  document.getElementById("statusMessage").textContent = message;
+
+  document.getElementById("lastHeartbeat").textContent =
+    formatTime(lastSeen);
+
+  document.getElementById("lastChecked").textContent =
+    formatTime(checkedAt);
+
+  system.textContent =
+    status === "ONLINE"
+      ? "FORTRESS is responding to WATCHTOWER heartbeats."
+      : status === "OFFLINE"
+      ? "No recent heartbeat received. The home server may be unavailable."
+      : "Unable to retrieve reliable server status.";
+}
+
+async function checkStatus() {
+  try {
+    const response = await fetch(WATCHTOWER_URL, {
+      method: "GET",
+      cache: "no-store",
+      headers: { "Accept": "application/json" }
+    });
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const data = await response.json();
+
+    if (data.server !== "FORTRESS" ||
+        !["ONLINE", "OFFLINE"].includes(data.status)) {
+      throw new Error("Invalid WATCHTOWER response");
+    }
+
+    const message = data.status === "ONLINE"
+      ? "Your home server is connected and reporting to WATCHTOWER."
+      : "No heartbeat received within the expected time window.";
+
+    showStatus(
+      data.status,
+      message,
+      data.lastSeen,
+      data.checkedAt
+    );
+
+  } catch (error) {
+    showStatus(
+      "CONNECTION ERROR",
+      "WATCHTOWER could not be reached. Server status is unknown.",
+      null,
+      new Date().toISOString()
+    );
+
+    document.getElementById("refreshInfo").textContent =
+      "Retrying automatically in 30 seconds.";
+  }
+}
+
+checkStatus();
+setInterval(checkStatus, REFRESH_INTERVAL);
+</script>
+
 </body>
 </html>
